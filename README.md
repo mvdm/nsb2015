@@ -12,5 +12,6 @@ includes content from:
 ***
 List of people:  
 * Matt van der Meer (mvdm)  
+* Eric Carmichael (ecarmichael)
 
 
