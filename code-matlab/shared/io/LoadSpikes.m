@@ -23,7 +23,7 @@ cfg_def.tsflag = 'sec';
 cfg_def.load_questionable_cells = 0;
 cfg_def.min_cluster_quality = 5;
 cfg_def.useClustersFile = 0;
-cfg_def.getTTnumbers = 1;
+cfg_def.getTTnumbers = 0;
 
 cfg = ProcessConfig2(cfg_def,cfg_in); % this takes fields from cfg_in and puts them into cfg
 
