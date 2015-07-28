@@ -57,14 +57,16 @@ psdfig=figure('units','normalized','outerposition',[0 0 1 1]);
 Fs=csc{17}.cfg.hdr{1,1}.SamplingFrequency; % this should be the same for everything
 wSize = 8092/2; % define window size
 hold on;
-
 for channel=17:32
     subplot(4,4,channel-16); %if we end up using ch1-16 change this
     [Pxx,F] = pwelch(csc{channel}.data,hamming(wSize),0,wSize,Fs); % use welch method to get power spectrum thing
     plot(F,10*log10(Pxx));
+    ax(channel-16)=gca;
     title(['Ch ' num2str(channel)])
     xlim([0 150]);
 end
+
+linkaxes(ax);
 suptitle([strrep(csc{17}.cfg.SessionID,'_','-') ' PSD'])
 xlabel('Frequency (Hz)'); ylabel('Power (dB)');
 end
