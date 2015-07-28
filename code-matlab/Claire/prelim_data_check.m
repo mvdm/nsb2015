@@ -38,18 +38,21 @@ for ch=1:no_chs
 end
 
 %% Load video - I just changed this to load into a structure (CW)
-[vid.Timestamps, vid.X, vid.Y, vid.Angles, vid.Targets, vid.Points, vid.Header] = Nlx2MatVT('VT1.nvt', [1 1 1 1 1 1], 1, 1, [] );
+if ~exist('VT1.nvt','file')
+    fprintf('No video file found, try unzipping...');
+else
+    [vid.Timestamps, vid.X, vid.Y, vid.Angles, vid.Targets, vid.Points, vid.Header] = Nlx2MatVT('VT1.nvt', [1 1 1 1 1 1], 1, 1, [] );
 
+    %% Plot video
+    vidlfpfig=figure('units','normalized','outerposition',[0 0 1 1]);
+    
+    keep_idx=(vid.X~=0&vid.Y~=0); %keep only points where position not (0,0)
+    %set(fh,'Color',[0 0 0]);
+    subplot(1,2,1)
+    plot(vid.X(keep_idx),vid.Y(keep_idx),'.','Color','k','MarkerSize',1); axis off;
+    title('Video tracking')
 
-
-%% Plot video
-vidlfpfig=figure('units','normalized','outerposition',[0 0 1 1]);
-
-keep_idx=(vid.X~=0&vid.Y~=0); %keep only points where position not (0,0)
-%set(fh,'Color',[0 0 0]);
-subplot(1,2,1)
-plot(vid.X(keep_idx),vid.Y(keep_idx),'.','Color','k','MarkerSize',1); axis off;
-title('Video tracking')
+end
 
 %% Plot LFP and show only a 2s window from the middle of the recording 
 
@@ -88,7 +91,7 @@ for ch=1:no_chs
     xlim([0 150]);
 end
 
-linkaxes(ax);
+linkaxes(ax,'x');
 suptitle([strrep(csc{1}.cfg.SessionID,'_','-') ' PSD'])
 xlabel('Frequency (Hz)'); ylabel('Power (dB)');
 end
