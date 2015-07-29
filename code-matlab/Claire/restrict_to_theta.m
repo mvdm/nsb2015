@@ -1,4 +1,7 @@
 function [csc_restricted,all_ivs] = restrict_to_theta(dir,channel)
+% Restrict the LFP for analysis to periods where there is both high theta
+% and high running speed
+%
 % Remember to  select channel for analysis using PSDs
 %
 % Takes the data directory (dir) and the channel you want to analyse
@@ -46,11 +49,6 @@ cfg.display_filter = 0; % show output of fvtool on filter
 cfg.bandtype = 'bandpass'; % 'highpass', 'lowpass'
 cfg.R = 0.25; % passband ripple (in dB) for Chebyshev filters only
 cfg.f = [7 10]; %filter range to use (in Hz)
-
-% testing please ignore
-% Wn = cfg.f ./ (Fs/2);
-% [b,a] = cheby1(cfg.order,cfg.R,Wn);
-% fvtool(b,a);
 
 csc_filt = FilterLFP(cfg,csc);
 
@@ -177,6 +175,16 @@ linkaxes(ax,'x')
 all_ivs.session=evt;
 all_ivs.theta=theta_iv;
 all_ivs.running=run_spd_iv;
+
+%% Create separate iv fields for each session (just in case)
+
+all_ivs.rest1=SelectIV_idx(all_ivs.session,1);
+all_ivs.trackA_nov=SelectIV_idx(all_ivs.session,2);
+all_ivs.rest2=SelectIV_idx(all_ivs.session,3);
+all_ivs.trackB_nov=SelectIV_idx(all_ivs.session,4);
+all_ivs.rest3=SelectIV_idx(all_ivs.session,5);
+all_ivs.trackA_fam=SelectIV_idx(all_ivs.session,6);
+all_ivs.rest5=SelectIV_idx(all_ivs.session,7);
 
 end
 
