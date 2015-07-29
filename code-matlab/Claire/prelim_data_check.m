@@ -87,7 +87,7 @@ for ch=1:no_chs
     [Pxx,F] = pwelch(csc{ch}.data,hamming(wSize),0,wSize,Fs); % use welch method to get power spectrum thing
     plot(F,10*log10(Pxx));
     ax(ch)=gca;
-    title(['Ch ' num2str(ch)])
+    title(['Ch ' num2str(channels(ch))])
     xlim([0 150]);
 end
 
