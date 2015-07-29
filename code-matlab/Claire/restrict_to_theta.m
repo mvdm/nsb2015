@@ -1,11 +1,12 @@
-function [csc,theta_evts] = restrict_to_theta(dir,channel)
+function [csc_restricted,evt = restrict_to_theta(dir,channel)
 % Remember to  select channel for analysis using PSDs
-% Spits out csc and the theta_evts which can then be used as input into
-% restrict.
+% Spits out csc_restricted and the evts which can be used to cut into
+% sessions
 % more info to come later...
+% still need to generalise a bit and maybe think about other input args
 
 %% testing cell
-
+% 
 dir='C:\Data\M14-2015-07-27_remapping1';
 channel=17;
 
@@ -16,7 +17,7 @@ cfg.fc = {['CSC' num2str(channel) '.ncs']};
 csc = LoadCSC(cfg);
 
 %% Load video
-[vid.Timestamps, vid.X, vid.Y, vid.Angles, vid.Targets, vid.Points, vid.Header] = Nlx2MatVT('VT1.nvt', [1 1 1 1 1 1], 1, 1, [] );
+pos=LoadPos([]);
 
 %% Find chunks with only good theta
 
@@ -69,28 +70,90 @@ cfg.dcn =  '>'; % '<', '>'
 cfg.merge_thr = 2; % merge events closer than this
 cfg.minlen = 1; % minimum interval length
 
-theta_evts=TSDtoIV(cfg,conv_theta_pwr);
-subplot(2,1,1)
-PlotTSDfromIV([],theta_evts,csc);
-ax(1)=gca;
-title('Detected theta events in raw LFP')
-subplot(2,1,2); hold on;
-plot(theta_pwr_z.tvec,theta_pwr_z.data);
-plot([theta_pwr_z.tvec(1) theta_pwr_z.tvec(end)],[thresh thresh],'LineWidth',2)
-ax(2)=gca;
-('Z-scored theta power');
-linkaxes(ax,'x')
+theta_iv=TSDtoIV(cfg,conv_theta_pwr);
+% subplot(2,1,1)
+% PlotTSDfromIV([],theta_iv,csc);
+% ax(1)=gca;
+% title('Detected theta in raw LFP')
+% subplot(2,1,2); hold on;
+% plot(theta_pwr_z.tvec,theta_pwr_z.data);
+% plot([theta_pwr_z.tvec(1) theta_pwr_z.tvec(end)],[thresh thresh],'LineWidth',2)
+% ax(2)=gca;
+% ('Z-scored theta power');
+% linkaxes(ax,'x')
 
-%% TODO Find chunks with running
-% this isn't ready yet
-% keep_idx=(vid.X~=0&vid.Y~=0); % Remove bad points
+%% Find chunks with running
+
+% Get distance travelled between each sample
+spd = getLinSpd([],pos);
+
+% plot(spd.tvec,spd.data,'.');hold on;plot(spd_filt.tvec,spd_filt.data,'.');
+
+% Remove weirdly high values
+cfg=[];
+cfg.method = 'raw';
+cfg.threshold = 150;
+cfg.dcn =  '<'; % '<', '>'
+cfg.merge_thr = 0.01; % merge events closer than this
+cfg.minlen = 0.01; % minimum interval length
+
+spd_iv=TSDtoIV(cfg,spd);
+spd=restrict(spd,spd_iv);
+
+figure;
+plot(spd.tvec,spd.data);
+pause;
+spd_thresh=input('Where should the threshold be?: '); %threshold over which the mouse counts as running
+close gcf
+
+if or(~isnumeric(thresh),length(thresh)>1)
+    error('Input must be a single number')
+end
+% Select only true running (please change the thresholds if you want to..)
+cfg=[];
+cfg.method = 'raw';
+cfg.threshold = spd_thresh;
+cfg.dcn =  '>'; % '<', '>'
+cfg.merge_thr = 0.3; % merge events closer than this
+cfg.minlen = 0.5; % minimum interval length
+run_spd_iv=TSDtoIV(cfg,spd);
+run_spd=restrict(spd,run_spd_iv);
 % 
-% % Get distance in x and y
-% X_change=diff(vid.X(keep_idx));
+% figure;
+% PlotTSDfromIV([],run_spd_iv,spd);
+% title('Detected running times in speed')
 
 %% TODO Find chunks w gamma (maybe?)
 
-%% TODO Restrict
+%% TODO Restrict using running and theta ivs
+
+% Select the theta bits
+csc_restricted=restrict(csc,theta_iv);
+% Now select the running bits
+csc_restricted=restrict(csc_restricted,run_spd_iv);
+
+figure;
+subplot(3,1,1)
+PlotTSDfromIV([],theta_iv,csc);
+title('Detected theta in raw LFP')
+ax(1)=gca;
+subplot(3,1,2)
+PlotTSDfromIV([],run_spd_iv,spd);
+title('Detected running times in speed')
+ax(2)=gca;
+subplot(3,1,3)
+plot(csc_restricted.tvec,csc_restricted.data);
+title('restricted lfp')
+
+linkaxes(ax,'x')
+
+%% TODO cut into trials
+
+cfg = [];
+cfg.eventList = {'Starting Recording','Stopping Recording'};
+evt = LoadEvents(cfg);
+
+
 
 end
 
