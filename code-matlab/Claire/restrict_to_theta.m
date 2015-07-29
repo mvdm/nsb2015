@@ -1,9 +1,23 @@
-function [csc_restricted,evt = restrict_to_theta(dir,channel)
+function [csc_restricted,evt] = restrict_to_theta(dir,channel)
 % Remember to  select channel for analysis using PSDs
-% Spits out csc_restricted and the evts which can be used to cut into
-% sessions
-% more info to come later...
-% still need to generalise a bit and maybe think about other input args
+%
+% Takes the data directory (dir) and the channel you want to analyse
+% (channel) as input
+%
+% Outputs csc_restricted and the 'start recording' and 'stop recording'
+% events in an interval format (evt) which can be used to cut into rest,
+% track A, track B sessions later 
+% 
+%
+% Theta threshold is set manually by the user as the theta z-score (which
+% you threshold to choose the high theta times) is determined by the
+% mean theta in a recording, which might be higher or lower depending on
+% your mouse (and then you need to lower or raise your threshold
+% accordingly)
+%
+% Movement threshold is set within the fn to 12 but if this doesn't seem
+% sensible feel free to change...
+
 
 %% testing cell
 % 
@@ -20,6 +34,8 @@ csc = LoadCSC(cfg);
 pos=LoadPos([]);
 
 %% Find chunks with only good theta
+
+close all
 
 % filter to theta freqs
 cfg=[];
@@ -55,7 +71,9 @@ theta_pwr_z = zscore_tsd(conv_theta_pwr);
 % Plot raw LFP and z-scored theta, get threshold as user input
 hold on;plot(csc.tvec,rescale(csc.data,3,4)); plot(theta_pwr_z.tvec,theta_pwr_z.data);
 legend('raw LFP','z-scored theta power');
+msgbox('Look at the LFP and theta power and press any button to continue when you are satisfied')
 pause;
+close gcf
 thresh=input('Where should the threshold be?: ');
 
 if or(~isnumeric(thresh),length(thresh)>1)
@@ -100,15 +118,8 @@ cfg.minlen = 0.01; % minimum interval length
 spd_iv=TSDtoIV(cfg,spd);
 spd=restrict(spd,spd_iv);
 
-figure;
-plot(spd.tvec,spd.data);
-pause;
-spd_thresh=input('Where should the threshold be?: '); %threshold over which the mouse counts as running
-close gcf
+spd_thresh=12;
 
-if or(~isnumeric(thresh),length(thresh)>1)
-    error('Input must be a single number')
-end
 % Select only true running (please change the thresholds if you want to..)
 cfg=[];
 cfg.method = 'raw';
@@ -125,17 +136,35 @@ run_spd=restrict(spd,run_spd_iv);
 
 %% TODO Find chunks w gamma (maybe?)
 
-%% TODO Restrict using running and theta ivs
+
+%% get session start and end ivs
+
+cfg = [];
+cfg.eventList = {'Starting Recording','Stopping Recording'};
+evt = LoadEvents(cfg);
+
+%Put in iv format
+
+evt.tstart=evt.t{1}';
+evt.tend=evt.t{2}';
+
+%% Restrict using running and theta ivs and plot outcome
 
 % Select the theta bits
 csc_restricted=restrict(csc,theta_iv);
 % Now select the running bits
 csc_restricted=restrict(csc_restricted,run_spd_iv);
 
+csc_for_plot=csc;
+csc_for_plot.data=rescale(csc.data,3,5);
+
 figure;
 subplot(3,1,1)
-PlotTSDfromIV([],theta_iv,csc);
-title('Detected theta in raw LFP')
+PlotTSDfromIV([],theta_iv,csc_for_plot);
+title('Detected theta in raw LFP and z-scored theta power')
+hold on;
+plot(theta_pwr_z.tvec,theta_pwr_z.data,'Color',[ 0.4940    0.1840    0.5560]);
+plot([theta_pwr_z.tvec(1) theta_pwr_z.tvec(end)],[thresh thresh],'LineWidth',2,'Color',[0.8500    0.3250    0.0980])
 ax(1)=gca;
 subplot(3,1,2)
 PlotTSDfromIV([],run_spd_iv,spd);
@@ -143,17 +172,14 @@ title('Detected running times in speed')
 ax(2)=gca;
 subplot(3,1,3)
 plot(csc_restricted.tvec,csc_restricted.data);
-title('restricted lfp')
+hold on;
+% put little arrows to mark session start and end
+plot(evt.tstart,0,'>g');
+plot(evt.tend,0,'<g');
+ax(3)=gca;
+title('restricted lfp and session markers')
 
 linkaxes(ax,'x')
-
-%% TODO cut into trials
-
-cfg = [];
-cfg.eventList = {'Starting Recording','Stopping Recording'};
-evt = LoadEvents(cfg);
-
-
 
 end
 
