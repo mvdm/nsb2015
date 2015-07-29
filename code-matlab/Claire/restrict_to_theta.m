@@ -1,22 +1,30 @@
-function [csc_restricted,evt] = restrict_to_theta(dir,channel)
+function [csc_restricted,all_ivs] = restrict_to_theta(dir,channel)
 % Remember to  select channel for analysis using PSDs
 %
 % Takes the data directory (dir) and the channel you want to analyse
 % (channel) as input
 %
-% Outputs csc_restricted and the 'start recording' and 'stop recording'
-% events in an interval format (evt) which can be used to cut into rest,
-% track A, track B sessions later 
+% Outputs csc_restricted and the ivs used for restricting (all_ivs.theta,
+% all_ivs.running) plus the start and end times of sessions in iv format
+% (all_ivs.session) - you can use this session info to cut out your
+% sessions of interest later on
 % 
 %
-% Theta threshold is set manually by the user as the theta z-score (which
-% you threshold to choose the high theta times) is determined by the
-% mean theta in a recording, which might be higher or lower depending on
+% Theta threshold (theta_thresh) is set manually by the user as the theta 
+% z-score (which you threshold to choose the high theta times) is determined 
+% by the mean theta in a recording, which might be higher or lower depending on
 % your mouse (and then you need to lower or raise your threshold
 % accordingly)
 %
-% Movement threshold is set within the fn to 12 but if this doesn't seem
-% sensible feel free to change...
+% Movement threshold (spd_thresh) is set within the fn to 12 but if this 
+% doesn't seem sensible feel free to change.
+% 
+% Other important parameters for theta and speed thresholding are the minlen 
+% and merge_thr which are set in seconds, I've tried to set this up to get
+% relatively big chunks out (at least half a second) but again feel free to
+% change if the output doesn't look sensible
+%
+% You could also change the smoothing on theta_power by changing stdev_size
 %% Load LFP
 cd(dir);
 cfg=[];
@@ -67,31 +75,21 @@ legend('raw LFP','z-scored theta power');
 msgbox('Look at the LFP and theta power and press any button to continue when you are satisfied')
 pause;
 close gcf
-thresh=input('Where should the threshold be?: ');
+theta_thresh=input('Where should the threshold be?: ');
 
-if or(~isnumeric(thresh),length(thresh)>1)
+if or(~isnumeric(theta_thresh),length(theta_thresh)>1)
     error('Input must be a single number')
 end
 
 % Threshold (this automatically z scores too
 cfg=[];
 cfg.method = 'zscore';
-cfg.threshold = thresh;
+cfg.threshold = theta_thresh;
 cfg.dcn =  '>'; % '<', '>'
 cfg.merge_thr = 2; % merge events closer than this
 cfg.minlen = 1; % minimum interval length
 
 theta_iv=TSDtoIV(cfg,conv_theta_pwr);
-% subplot(2,1,1)
-% PlotTSDfromIV([],theta_iv,csc);
-% ax(1)=gca;
-% title('Detected theta in raw LFP')
-% subplot(2,1,2); hold on;
-% plot(theta_pwr_z.tvec,theta_pwr_z.data);
-% plot([theta_pwr_z.tvec(1) theta_pwr_z.tvec(end)],[thresh thresh],'LineWidth',2)
-% ax(2)=gca;
-% ('Z-scored theta power');
-% linkaxes(ax,'x')
 
 %% Find chunks with running
 
@@ -157,7 +155,7 @@ PlotTSDfromIV([],theta_iv,csc_for_plot);
 title('Detected theta in raw LFP and z-scored theta power')
 hold on;
 plot(theta_pwr_z.tvec,theta_pwr_z.data,'Color',[ 0.4940    0.1840    0.5560]);
-plot([theta_pwr_z.tvec(1) theta_pwr_z.tvec(end)],[thresh thresh],'LineWidth',2,'Color',[0.8500    0.3250    0.0980])
+plot([theta_pwr_z.tvec(1) theta_pwr_z.tvec(end)],[theta_thresh theta_thresh],'LineWidth',2,'Color',[0.8500    0.3250    0.0980])
 ax(1)=gca;
 subplot(3,1,2)
 PlotTSDfromIV([],run_spd_iv,spd);
@@ -173,6 +171,12 @@ ax(3)=gca;
 title('restricted lfp and session markers')
 
 linkaxes(ax,'x')
+
+%% Create all_ivs output
+
+all_ivs.session=evt;
+all_ivs.theta=theta_iv;
+all_ivs.running=run_spd_iv;
 
 end
 
