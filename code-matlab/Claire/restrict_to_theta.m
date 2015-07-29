@@ -132,11 +132,6 @@ cfg = [];
 cfg.eventList = {'Starting Recording','Stopping Recording'};
 evt = LoadEvents(cfg);
 
-%Put in iv format
-
-evt.tstart=evt.t{1}';
-evt.tend=evt.t{2}';
-
 %% Restrict using running and theta ivs and plot outcome
 
 % Select the theta bits
@@ -172,7 +167,7 @@ linkaxes(ax,'x')
 
 %% Create all_ivs output
 
-all_ivs.session=evt;
+all_ivs.session=iv(evt.t{1}',evt.t{2}');
 all_ivs.theta=theta_iv;
 all_ivs.running=run_spd_iv;
 
