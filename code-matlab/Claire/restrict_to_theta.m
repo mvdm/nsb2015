@@ -17,13 +17,6 @@ function [csc_restricted,evt] = restrict_to_theta(dir,channel)
 %
 % Movement threshold is set within the fn to 12 but if this doesn't seem
 % sensible feel free to change...
-
-
-%% testing cell
-% 
-dir='C:\Data\M14-2015-07-27_remapping1';
-channel=17;
-
 %% Load LFP
 cd(dir);
 cfg=[];
