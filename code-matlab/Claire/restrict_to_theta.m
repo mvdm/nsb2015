@@ -179,7 +179,7 @@ all_ivs.rest2=SelectIV_idx(all_ivs.session,3);
 all_ivs.trackB_nov=SelectIV_idx(all_ivs.session,4);
 all_ivs.rest3=SelectIV_idx(all_ivs.session,5);
 all_ivs.trackA_fam=SelectIV_idx(all_ivs.session,6);
-all_ivs.rest5=SelectIV_idx(all_ivs.session,7);
+all_ivs.rest4=SelectIV_idx(all_ivs.session,7);
 
 end
 
