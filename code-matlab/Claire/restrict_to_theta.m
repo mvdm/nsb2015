@@ -158,8 +158,8 @@ subplot(3,1,3)
 plot(csc_restricted.tvec,csc_restricted.data);
 hold on;
 % put little arrows to mark session start and end
-plot(evt.tstart,0,'>g');
-plot(evt.tend,0,'<g');
+plot(evt.t{1},0,'>g');
+plot(evt.t{2},0,'<g');
 ax(3)=gca;
 title('restricted lfp and session markers')
 
