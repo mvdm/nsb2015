@@ -23,7 +23,7 @@ if isempty(cfg.t) % prompt user
     pos = LoadPos([]); % assumes VT1.nvt present
     
     f = figure;
-    plot(pos.tvec,getd(pos,'x'));
+    plot(pos.tvec,getd(pos,'x'),'.');
     title('Select interval to keep (start and end times):');
     
     cfg.t = ginput(2);
@@ -59,8 +59,9 @@ for iTT = 1:length(cfg.fc)
     
     % save tt
     
-    fname_out = cat(2,fname_in,'r');
+    [fp fn fe] = fileparts(fname_in);
+    fname_out = cat(2,fn,'r',fe);
     
-    Mat2NlxSpike(fname_out, 0, 1, [], [1 1 1 1 1], ttin.Timestamps(keep_idx), ttin.ScNumbers(keep_idx), ttin.CellNumbers(keep_idx), ttin.Features(:,keep_idx), ttin.Samples(:,:,keep_idx), Header);
+    Mat2NlxSpike(fname_out, 0, 1, [], [1 1 1 1 1], ttin.Timestamps(keep_idx), ttin.ScNumbers(keep_idx), ttin.CellNumbers(keep_idx), ttin.Features(:,keep_idx), ttin.Samples(:,:,keep_idx), ttin.Header);
     
 end
