@@ -14,7 +14,6 @@ List of people:
 * Matt van der Meer (mvdm)  
 * Eric Carmichael (ecarmichael)
 * Claire Wu (clairebee)
+* Anna Mariano (annam90)
 * Kaitlin Carlson (kscarlson)
-
-
 
