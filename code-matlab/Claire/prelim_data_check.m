@@ -1,4 +1,4 @@
-function [csc,vid] = prelim_data_check(dir,channels)
+function [csc,vid,maxpwr] = prelim_data_check(dir,channels)
 % Runs a preliminary check on all the data. Takes data directory (dir) as input
 % and the channels you want to use and spits out a figure showing raw LFPs, 
 % PSDs and tracking info.
@@ -89,10 +89,19 @@ for ch=1:no_chs
     ax(ch)=gca;
     title(['Ch ' num2str(channels(ch))])
     xlim([0 150]);
+    
+    maxpwr.channel{ch}=['Ch ' num2str(channels(ch))];
+    [maxpwr.power(ch),idx]=max(Pxx(F>7&F<10));
+    F=F(F>7&F<10);
+    maxpwr.freq(ch)=F(idx);
 end
 
 linkaxes(ax,'x');
 suptitle([strrep(csc{1}.cfg.SessionID,'_','-') ' PSD'])
 xlabel('Frequency (Hz)'); ylabel('Power (dB)');
+
+%% Suggest a channel...
+[maxpwr_ch,idx]=max(maxpwr.power);
+disp(['the max theta power is ' num2str(maxpwr_ch) ' on ' maxpwr.channel{idx}])
 end
 
