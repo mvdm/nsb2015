@@ -43,7 +43,7 @@ if ~exist('VT1.nvt','file')
 else
     [vid.Timestamps, vid.X, vid.Y, vid.Angles, vid.Targets, vid.Points, vid.Header] = Nlx2MatVT('VT1.nvt', [1 1 1 1 1 1], 1, 1, [] );
 
-    %% Plot video
+%Plot video
     vidlfpfig=figure('units','normalized','outerposition',[0 0 1 1]);
     
     keep_idx=(vid.X~=0&vid.Y~=0); %keep only points where position not (0,0)

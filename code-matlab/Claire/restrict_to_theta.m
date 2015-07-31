@@ -94,8 +94,6 @@ theta_iv=TSDtoIV(cfg,conv_theta_pwr);
 % Get distance travelled between each sample
 spd = getLinSpd([],pos);
 
-% plot(spd.tvec,spd.data,'.');hold on;plot(spd_filt.tvec,spd_filt.data,'.');
-
 % Remove weirdly high values
 cfg=[];
 cfg.method = 'raw';
@@ -118,10 +116,48 @@ cfg.merge_thr = 0.3; % merge events closer than this
 cfg.minlen = 0.5; % minimum interval length
 run_spd_iv=TSDtoIV(cfg,spd);
 run_spd=restrict(spd,run_spd_iv);
+
+% plot(spd.tvec,spd.data);hold on;plot(run_spd.tvec,run_spd.data,'.');
+
 % 
 % figure;
 % PlotTSDfromIV([],run_spd_iv,spd);
 % title('Detected running times in speed')
+
+%% Getting different run speed bins
+
+% Baseline bin
+
+spd_tmp=spd;
+
+for i=1:3
+    cfg=[];
+    cfg.method = 'raw';
+    cfg.threshold = [5+(i-1)*10 5+i*10];
+    cfg.dcn =  'range'; % '<', '>'
+    cfg.merge_thr = 0.3; % merge events closer than this
+    cfg.minlen = 0.5; % minimum interval length
+    run_bin_iv{i}=TSDtoIV(cfg,spd_tmp);
+    run_bin{i}=restrict(spd_tmp,run_bin_iv{i});
+    run_bin_iv{i}.name=num2str(cfg.threshold);
+end
+
+%sanity plot
+figure;
+plot(spd.tvec,spd.data);
+
+hold on;
+for i=1:3
+    plot(run_bin{i}.tvec,run_bin{i}.data,'.');
+end
+
+% plot time in each bin
+
+for i=1:3
+    run_time(i)=sum(run_bin_iv{i}.tend-run_bin_iv{i}.tstart);
+end
+figure;
+bar(5:10:25,run_time,'histc')
 
 %% TODO Find chunks w gamma (maybe?)
 
@@ -130,7 +166,10 @@ run_spd=restrict(spd,run_spd_iv);
 
 cfg = [];
 cfg.eventList = {'Starting Recording','Stopping Recording'};
+
+
 evt = LoadEvents(cfg);
+
 
 %% Restrict using running and theta ivs and plot outcome
 
@@ -167,9 +206,25 @@ linkaxes(ax,'x')
 
 %% Create all_ivs output
 
-all_ivs.session=iv(evt.t{1}',evt.t{2}');
+if length(evt.t{1})>1
+    all_ivs.session=iv(evt.t{1}',evt.t{2}');
+else
+    disp('manual input of recording start and end')
+    tstarts=input('Please input tstarts: ')';
+    tends=input('Please input tends: ')';
+    
+    if or(~isnumeric(tstarts),~isnumeric(tends))
+        error('input not numeric')
+    else
+        if length(tstarts)~=length(tends)
+            error('tstarts and tends are not same length')
+        end
+        all_ivs.session=iv(tstarts,tends);
+    end
+end
 all_ivs.theta=theta_iv;
 all_ivs.running=run_spd_iv;
+all_ivs.run_bins=run_bin_iv;
 
 %% Create separate iv fields for each session (just in case)
 
