@@ -33,11 +33,11 @@ smooth_win=0.125; %in s
 smooth_ifrq=ifrq;
 smooth_ifrq.data=smooth(ifrq.data,smooth_win*2000); 
 
-figure;
-plot(csc.tvec,rescale(csc.data,-5,0))
-hold on;
-plot(ifrq.tvec,ifrq.data)
-plot(smooth_ifrq.tvec,smooth_ifrq.data)
+% figure;
+% plot(csc.tvec,rescale(csc.data,-5,0))
+% hold on;
+% plot(ifrq.tvec,ifrq.data)
+% plot(smooth_ifrq.tvec,smooth_ifrq.data)
 
 smooth_ifrq=tsd(smooth_ifrq.tvec,smooth_ifrq.data');
 
