@@ -15,4 +15,5 @@ List of people:
 * Eric Carmichael (ecarmichael)
 * Claire Wu (clairebee)
 * Anna Mariano (annam90)
+* Kaitlin Carlson (kscarlson)
 
