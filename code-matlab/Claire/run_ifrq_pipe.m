@@ -60,4 +60,8 @@ ifrq_bins.bin3=restrict(smooth_ifrq,all_ivs.run_bins{3});
 ifrq_bins.bin3.name=all_ivs.run_bins{3}.name;
 
 [all_sess.bins] = mean_ifrq('all',ifrq_bins);
+
+%% output ivs
+
+all_sess.ivs=all_ivs;
 end

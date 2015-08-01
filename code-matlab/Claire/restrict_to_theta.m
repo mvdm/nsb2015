@@ -170,7 +170,6 @@ cfg.eventList = {'Starting Recording','Stopping Recording'};
 
 evt = LoadEvents(cfg);
 
-
 %% Restrict using running and theta ivs and plot outcome
 
 % Select the theta bits
@@ -210,6 +209,8 @@ if length(evt.t{1})>1
     all_ivs.session=iv(evt.t{1}',evt.t{2}');
 else
     disp('manual input of recording start and end')
+    disp(['start recording: ' num2str(evt.t{1})])
+    disp(['stop recording: ' num2str(evt.t{2})])
     tstarts=input('Please input tstarts: ')';
     tends=input('Please input tends: ')';
     
