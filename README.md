@@ -1,4 +1,4 @@
-Welcome to the NS&B 2015 hippocampus cycle codebase!
+Welcome to the NS&B 2016 hippocampus cycle codebase!
 
 ***
 
@@ -12,8 +12,5 @@ includes content from:
 ***
 List of people:  
 * Matt van der Meer (mvdm)  
-* Eric Carmichael (ecarmichael)
-* Claire Wu (clairebee)
-* Anna Mariano (annam90)
-* Kaitlin Carlson (kscarlson)
+
 
